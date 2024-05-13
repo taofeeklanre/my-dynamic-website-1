@@ -39,29 +39,112 @@ In our Reference Architecture above,
 27.	Amazon Machine Image (AMI)- We will create an AMI from the EC2 instance we have install and configured the web file on.
 
 ## Deployment Script
-#!/bin/bash
 
-sudo su
+  ## SHELL SCRIPT TO CONFIGURE THE WEBSERVER
+    # This command indicates that the script should be interpreted and executed using the Bash shell
+    #!/bin/bash
 
-yum update -y
+    # This command updates all the packages on the server to their latest versions
+    sudo yum update -y
 
-yum install -y httpd 
+    # This series of commands installs the Apache web server, enables it to start on boot, and then starts the server immediately
+    sudo yum install -y httpd
+    sudo systemctl enable httpd 
+    sudo systemctl start httpd
 
-cd  /var/www/html
+    # This command installs PHP along with several necessary extensions for the application to run
+    sudo dnf install -y \
+    php \
+    php-pdo \
+    php-openssl \
+    php-mbstring \
+    php-exif \
+    php-fileinfo \
+    php-xml \
+    php-ctype \
+    php-json \
+    php-tokenizer \
+    php-curl \
+    php-cli \
+    php-fpm \
+    php-mysqlnd \
+    php-bcmath \
+    php-gd \
+    php-cgi \
+    php-gettext \
+    php-intl \
+    php-zip
 
-wget https://github.com/taofeeklanre/static-website-Repository/raw/main/Speed%20Free%20Cycle.zip
+    ## These commands Installs MySQL version 8
+    To install MYSQL on the server, the following command will be executed.
+    sudo dnf search mysql
+    sudo dnf update
+    sudo wget https://dev.mysql.com/get/mysql80-community-release-el9-4.noarch.rpm
+    sudo dnf install mysql80-community-release-el9-4.noarch.rpm
+    dnf repolist enabled
+    sudo dnf install mysql-community-server -y
+    sudo mysql -V
+    sudo systemctl start mysqld
+    sudo systemctl enable mysqld
+    sudo systemctl status mysqld
+    
+    # This command enables the 'mod_rewrite' module in Apache on an EC2 Linux instance. It allows the use of .htaccess files for URL rewriting and other directives in the '/var/www/html' directory
+    sudo sed -i '/<Directory "\/var\/www\/html">/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/httpd/conf/httpd.conf
+    
+    # Environment Veriable
+    S3_BUCKET_NAME=aosnote-shopwise-web-files
+    
+    # This command downloads the contents of the specified S3 bucket to the '/var/www/html' directory on the EC2 instance
+    sudo aws s3 sync s3://taofeeklanre-nest-webfile /var/www/html
 
-unzip Speed\ Free\ Cycle.zip 
+    # This command changes the current working directory to '/var/www/html', which is the standard directory for hosting web pages on a Unix-based server
+    cd /var/www/html
+    
+    # This command is used to extract the contents of the application code zip file that was previously downloaded from the S3 bucket
+    sudo unzip  nest-app.zip
+    
+    # This command recursively copies all files, including hidden ones, from the 'shopwise' directory to the '/var/www/html/'
+    sudo cp -R nest-app/. /var/www/html/
+    
+    # This command permanently deletes the 'shopwise' directory and the 'shopwise.zip' file.
+    sudo rm -rf nest-app nest-app.zip
+    
+    # This command set permissions 777 for the '/var/www/html' directory and the 'storage/' directory
+    sudo chmod -R 777 /var/www/html
+    sudo chmod -R 777 storage/
+    
+    # This command will open th vi editor and allow you to edit the .env file to add your database credentials 
+    sudo vi .env
 
-cp -r /var/www/html/speed/* /var/www/html
+    # This command will restart the Apache server
+    sudo service httpd restart
+    
+  ## SCRIPT TO MIGRATE FLYWAY
+    #!/bin/bash
 
-cd /var/www/html
+    # Update all packages
+    sudo yum update -y
+    
+    # Download and extract Flyway
+    
+    sudo wget -qO- https://download.red-gate.com/maven/release/com/redgate/flyway/flyway-commandline/10.12.0/flyway-commandline-10.12.0-linux-x64.tar.gz | tar -xvz && sudo ln -s `pwd`/flyway-10.12.0/flyway /usr/local/bin 
+    
+    # OR seperate the symbolic link as below
+    # Create a symbolic link to make Flyway accessible globally
+    sudo ln -s $(pwd)/flyway-10.9.1/flyway /usr/local/bin
 
-rm -rf Speed\ Free\ Cycle.zip
-
-systemctl enable httpd
-
-systemctl start httpd
+    # Create the SQL directory for migrations
+    sudo mkdir sql
+    
+    # Download the migration SQL script from AWS S3
+    sudo aws s3 cp s3://taofeeklanre-nest-sql-file/V1__nest.sql sql/
+    
+    # Run Flyway migration
+    flyway -url=jdbc:mysql://rentzone-db.cf8emlrkavsw.us-east-1.rds.amazonaws.com:3306/applicatiodb \
+      -user=taofeek \
+      -password=rahmah2005 \
+      -locations=filesystem:sql \
+      migrate
 
 ## Deployment Steps
 
