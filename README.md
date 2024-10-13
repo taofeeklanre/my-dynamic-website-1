@@ -235,6 +235,7 @@ Review and launch the instance, selecting or creating a key pair for SSH access.
     sudo systemctl enable httpd
 
 ## Step 7: Create a NAT Gateway
+![Project Nat-Gateway Architecture](https://github.com/taofeeklanre/my-dynamic-website-1/blob/main/3._Nat_Gateway_Reference_Architecture.jpg?raw=true)
 
 In the VPC dashboard, navigate to "NAT Gateways".
 
@@ -297,7 +298,9 @@ html1.png: Website displayed for the application.
 README.md: This README file.
 
 ## Website displayed
-
+![Project Website](https://github.com/taofeeklanre/my-dynamic-website-1/blob/main/website-1.jpg?raw=true)
+![Project Website](https://github.com/taofeeklanre/my-dynamic-website-1/blob/main/website-2.jpg?raw=true)
+![Project Website](https://github.com/taofeeklanre/my-dynamic-website-1/blob/main/website-3.jpg?raw=true)
 ## Additional Resources
 AWS VPC Documentation
 
