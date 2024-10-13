@@ -6,7 +6,7 @@
 This project demonstrates hosting a Dynamic website app on AWS using various resources like VPC, subnets, Internet Gateway, Nat Gateway, Bastion host, Application Load Balancer, EC2 instances, Auto Scaling Group, and Route 53. The project aims to achieve high availability, fault tolerance, scalability, and elasticity for the web app.
 
 ## Architecture
-![Project Architecture](https://github.com/taofeeklanre/your-repo-name/blob/main/assets/vpc-architecture.jpg?raw=true)
+![Project Architecture](https://github.com/taofeeklanre/my-dynamic-website-1/blob/main/1._LAMP_Stack_Project_Reference_Architecture.jpg?raw=true)
 
 VPC Configuration:
 
